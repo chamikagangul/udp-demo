@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 const peers = {};
 
 // Register a peer
-app.post("/register", (req, res) => {
+app.post("/udp/register", (req, res) => {
 	const { peer_id, address } = req.body;
 
 	if (!peer_id || !address) {
@@ -24,7 +24,7 @@ app.post("/register", (req, res) => {
 });
 
 // Get peer information
-app.post("/get_peer", (req, res) => {
+app.post("/udp/get_peer", (req, res) => {
 	const { requested_id, requester_id } = req.body;
 
 	if (!requested_id || !requester_id) {
@@ -48,7 +48,7 @@ app.post("/get_peer", (req, res) => {
 	});
 });
 
-app.get("/", (req, res) => {
+app.get("/udp", (req, res) => {
 	console.log("peers", peers);
 	res.json(peers);
 });

@@ -1,0 +1,90 @@
+openapi: 3.0.0
+info:
+  title: UDP Rendezvous Server API
+  description: API for registering and retrieving UDP peer information.
+  version: "1.0"
+servers:
+  - url: http://localhost:8000
+paths:
+  /udp/register:
+    post:
+      summary: Register a UDP peer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                peer_id:
+                  type: string
+                  description: Unique identifier for the peer
+                address:
+                  type: string
+                  description: Network address of the peer
+              required:
+                - peer_id
+                - address
+      responses:
+        '200':
+          description: Peer registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  peer_id:
+                    type: string
+        '400':
+          description: Missing peer_id or address
+  /udp/get_peer:
+    post:
+      summary: Get UDP peer information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requested_id:
+                  type: string
+                  description: ID of the peer whose information is being requested
+                requester_id:
+                  type: string
+                  description: ID of the peer making the request
+              required:
+                - requested_id
+                - requester_id
+      responses:
+        '200':
+          description: Peer information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  peer_address:
+                    type: string
+                  requester_address:
+                    type: string
+        '400':
+          description: Missing requested_id or requester_id
+        '404':
+          description: Requested peer not found or requester not registered
+  /udp:
+    get:
+      summary: List all UDP peers
+      responses:
+        '200':
+          description: List of all registered UDP peers
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
