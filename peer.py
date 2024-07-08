@@ -5,7 +5,7 @@ import threading
 import time
 import json
 
-RENDEZVOUS_SERVER_URL = 'http://127.0.0.1:6000'
+RENDEZVOUS_SERVER_URL = 'http://localhost:8000'
 
 def peer(peer_id):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
