@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "node main.js",
-    "build": "webpack"
+    "build": ""
   },
   "dependencies": {
     "express": "^4.19.2"
