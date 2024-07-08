@@ -53,7 +53,11 @@ app.get("/", (req, res) => {
 	res.json(peers);
 });
 
-// Start the server
-app.listen(port, () => {
-	console.log(`Rendezvous server running on http://localhost:${port}`);
-});
+function main() {
+	// Start the server
+	app.listen(port, () => {
+		console.log(`Rendezvous server running on http://localhost:${port}`);
+	});
+}
+
+main();
