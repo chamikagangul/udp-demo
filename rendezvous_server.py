@@ -29,6 +29,11 @@ def get_peer():
         })
     else:
         return jsonify({"status": "not_found"})
+    
+@app.route('/peers', methods=['GET'])
+def get_peers():
+    print(peers)
+    return jsonify(peers)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=6000)
