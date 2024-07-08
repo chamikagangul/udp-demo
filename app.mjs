@@ -6,6 +6,8 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const peers = {};
+
 // add a book - request body should contain a title, status and an author
 app.post("/reading-list/books", (req, res) => {
   const { title, author, status } = req.body;
