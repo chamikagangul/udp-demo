@@ -17,6 +17,34 @@ tags:
   - name: books
     description: In-memory book list cache API
 paths:
+  /get_peers:
+    summary: Get peers
+    post:
+      summary: Get peers
+      operationId: GetPeers
+      tags:
+        - books
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StringArray"
+  /register:
+    summary: Register peer
+    post:
+      summary: Register peer
+      operationId: RegisterPeer
+      tags:
+        - books
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StringArray"
   /books:
     summary: List all books
     get:
