@@ -1,90 +1,156 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
-  title: UDP Rendezvous Server API
-  description: API for registering and retrieving UDP peer information.
-  version: "1.0"
+  title: Choreo Samples - Reading List - Nodejs REST API
+  description: >-
+    This is a sample API specification for a simple reading list application with in-memory cache
+    written in Nodejs
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Choreo
+  url: https://choreo.dev
 servers:
-  - url: http://localhost:8000
+  - url: http://localhost:8080
+tags:
+  - name: books
+    description: In-memory book list cache API
 paths:
-  /udp/register:
-    post:
-      summary: Register a UDP peer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                peer_id:
-                  type: string
-                  description: Unique identifier for the peer
-                address:
-                  type: string
-                  description: Network address of the peer
-              required:
-                - peer_id
-                - address
-      responses:
-        '200':
-          description: Peer registered successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                  peer_id:
-                    type: string
-        '400':
-          description: Missing peer_id or address
-  /udp/get_peer:
-    post:
-      summary: Get UDP peer information
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                requested_id:
-                  type: string
-                  description: ID of the peer whose information is being requested
-                requester_id:
-                  type: string
-                  description: ID of the peer making the request
-              required:
-                - requested_id
-                - requester_id
-      responses:
-        '200':
-          description: Peer information retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                  peer_address:
-                    type: string
-                  requester_address:
-                    type: string
-        '400':
-          description: Missing requested_id or requester_id
-        '404':
-          description: Requested peer not found or requester not registered
-  /udp:
+  /books:
+    summary: List all books
     get:
-      summary: List all UDP peers
+      summary: List all books
+      operationId: ListAllBooks
+      tags:
+        - books
       responses:
-        '200':
-          description: List of all registered UDP peers
+        "200":
+          description: Successful operation
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties:
-                  type: string
+                $ref: "#/components/schemas/StringArray"
+    post:
+      summary: Insert a new book
+      operationId: SetNewBook
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid request body
+      tags:
+        - books
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KeyValue"
+
+  /books/{uuid}:
+    summary: Get book by UUID
+    get:
+      tags:
+        - books
+      summary: Get book by UUID
+      operationId: GetBookByUUID
+      parameters:
+        - name: uuid
+          in: path
+          description: UUID of book to return
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyValue"
+        "404":
+          description: UUID not found
+    delete:
+      tags:
+        - books
+      summary: Delete book by UUID
+      description: Deletes a single book based on the UUID supplied
+      operationId: DeleteBookByUUID
+      parameters:
+        - name: uuid
+          in: path
+          description: UUID of book to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: ISBN not found
+    put:
+      tags:
+        - books
+      summary: Update book status by UUID
+      description: Updates the status of the book based on the UUID supplied
+      operationId: UpdateBookStatusByUUID
+      parameters:
+        - name: uuid
+          in: path
+          description: UUID of book to update
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: UUID not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Status"
+  /healthz:
+    summary: Healthcheck endpoint
+    get:
+      summary: Healthcheck
+      operationId: Healthcheck
+      responses:
+        "200":
+          description: Healthy response
+
+components:
+  schemas:
+    Key:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "my-uuid"
+    Status:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "read"
+    KeyValue:
+      type: object
+      required:
+        - title
+        - author
+        - status
+      properties:
+        title:
+          type: string
+          example: "my-title"
+        author:
+          type: string
+          example: "my-author"
+        status:
+          type: string
+          example: "read"
+    StringArray:
+      type: array
+      items:
+        type: string
