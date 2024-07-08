@@ -30,7 +30,7 @@ def get_peer():
     else:
         return jsonify({"status": "not_found"})
     
-@app.route('/peers', methods=['GET'])
+@app.route('/', methods=['GET'])
 def get_peers():
     print(peers)
     return jsonify(peers)
