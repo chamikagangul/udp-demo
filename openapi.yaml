@@ -17,7 +17,7 @@ tags:
   - name: books
     description: In-memory book list cache API
 paths:
-  /get_peers:
+  /get_peer:
     summary: Get peers
     post:
       summary: Get peers
