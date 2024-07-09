@@ -9,7 +9,7 @@ class RendezvousServer:
         self.sock.bind((self.host, self.port))
 
         self.sock2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock2.bind(self.host, 6000)
+        self.sock2.bind((self.host, 6000))
         self.peers = {}
 
     def run(self):
