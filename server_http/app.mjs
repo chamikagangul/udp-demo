@@ -84,7 +84,8 @@ app.delete("/reading-list/books/:uuid", (req, res) => {
 
 
 // Register a peer
-app.post("/reading-list/register", (req, res) => {
+app.post("/register", (req, res) => {
+  console.log("registering peer", req.connection.remoteAddress, req.connection.remotePort);
 	const { peer_id, address } = req.body;
 
 	if (!peer_id || !address) {
@@ -96,7 +97,7 @@ app.post("/reading-list/register", (req, res) => {
 });
 
 // Get peer information
-app.post("/reading-list/get_peer", (req, res) => {
+app.post("/get_peer", (req, res) => {
 	const { requested_id, requester_id } = req.body;
 
 	if (!requested_id || !requester_id) {

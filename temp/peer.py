@@ -5,12 +5,13 @@ import threading
 import time
 import json
 
-RENDEZVOUS_SERVER_URL = 'http://localhost:8000'
+RENDEZVOUS_SERVER_URL = 'http://localhost:6000'
 
 def peer(peer_id):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(('0.0.0.0', 0))
     my_addr = sock.getsockname()
+    my_addr = get_my_ip(), my_addr[1]
     print(f"My address: {my_addr}")
 
     # Register with rendezvous server
@@ -25,6 +26,7 @@ def peer(peer_id):
                              json={'requested_id': other_id, 'requester_id': peer_id},
                              verify=True)  # Set verify=False if using self-signed cert
     data = response.json()
+    print(data)
     if data['status'] == 'success':
         peer_addr = tuple(data['peer_address'])
         print(f"Peer address: {peer_addr}")
@@ -54,6 +56,11 @@ def handle_messages(sock):
         data, addr = sock.recvfrom(1024)
         if data != b"punch":
             print(f"Received from {addr}: {data.decode()}")
+
+# get my ip address
+def get_my_ip():
+    response = requests.get('https://api.ipify.org')
+    return response.text
 
 if __name__ == "__main__":
     my_id = input("Enter your peer ID: ")
