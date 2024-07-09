@@ -70,6 +70,9 @@ class PeerClient:
         update_thread = threading.Thread(target=self.update_peer_list)
         update_thread.start()
 
+        hole_punch_thread = threading.Thread(target=self.hole_punch)
+        hole_punch_thread.start()
+
         print("You can start sending messages.")
         while True:
             message = input("Enter message (or 'quit' to exit): ")
@@ -78,6 +81,16 @@ class PeerClient:
             self.send_message(message)
 
         print("Exiting...")
+
+    def hole_punch(self):
+        print("Starting hole punch...")
+        while True:
+            message = json.dumps({
+                'type': 'hole_punch',
+                'username': self.username
+            })
+            for peer, addr in self.peers.items():
+                self.sock.sendto(message.encode(), tuple(addr['addr']))
 
 if __name__ == '__main__':
     username = input("Enter your username: ")
