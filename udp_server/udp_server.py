@@ -7,6 +7,9 @@ class RendezvousServer:
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.host, self.port))
+
+        self.sock2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock2.bind(self.host, 6000)
         self.peers = {}
 
     def run(self):
@@ -28,6 +31,7 @@ class RendezvousServer:
                     'peers': self.peers
                 })
                 self.sock.sendto(response.encode(), addr)
+                self.sock2.sendto("test ping".encode(), addr)
 
 if __name__ == '__main__':
     server = RendezvousServer('0.0.0.0', 5000)
