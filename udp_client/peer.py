@@ -90,7 +90,8 @@ class PeerClient:
                 'username': self.username
             })
             for peer, addr in self.peers.items():
-                self.sock.sendto(message.encode(), tuple(addr['addr']))
+                if peer != self.username:
+                    print(f"Sending hole punch to {peer}: {addr['addr']}")
 
 if __name__ == '__main__':
     username = input("Enter your username: ")
