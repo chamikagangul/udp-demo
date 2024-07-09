@@ -10,6 +10,8 @@ class PeerClient:
         self.rendezvous_port = rendezvous_port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind(('0.0.0.0', 0))
+        # print local address
+        print(f"Local address: {self.sock.getsockname()}")
         self.peers = {}
         self.local_addr = self.sock.getsockname()
 
@@ -36,7 +38,13 @@ class PeerClient:
         if broadcast:
             for peer, addr in self.peers.items():
                 if peer != self.username:
-                    self.sock.sendto(message.encode(), tuple(addr['addr']))
+                    print(f"Sending to {peer}: {message} ({addr['addr']})")
+                    m = json.dumps({
+                        'type': 'message',
+                        'from': self.username,
+                        'message': message
+                    })
+                    self.sock.sendto(m.encode(), tuple(addr['addr']))
         else:
             self.send_message(message, broadcast=True)
 
@@ -47,9 +55,9 @@ class PeerClient:
                 response = json.loads(data.decode())
                 if response['type'] == 'peer_list':
                     self.peers = response['peers']
-                    # print("Updated peer list:")
-                    # for peer, peer_info in self.peers.items():
-                    #     print(f"  {peer}: {peer_info['addr']}")
+                    print("Updated peer list:")
+                    for peer, peer_info in self.peers.items():
+                        print(f"  {peer}: {peer_info['addr']}")
                 else:
                     print(f"Received from {addr}: {data.decode()}")
             except json.JSONDecodeError:
@@ -73,5 +81,5 @@ class PeerClient:
 
 if __name__ == '__main__':
     username = input("Enter your username: ")
-    client = PeerClient(username, 'localhost', 5000)
+    client = PeerClient(username, '54.221.183.140', 5000)
     client.run()
