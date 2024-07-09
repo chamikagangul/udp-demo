@@ -22,6 +22,7 @@ class RendezvousServer:
                 }
                 print(f"Registered {message['username']} at {addr}")
             elif message['type'] == 'get_peers':
+                print(f"Sending peer list to {addr}")
                 response = json.dumps({
                     'type': 'peer_list',
                     'peers': self.peers
