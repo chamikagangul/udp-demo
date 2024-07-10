@@ -4,96 +4,75 @@ import threading
 import time
 
 class PeerClient:
-    def __init__(self, username, rendezvous_host, rendezvous_port):
+    def __init__(self, username, peer_ip, rendezvous_ip, rendezvous_port):
         self.username = username
-        self.rendezvous_host = rendezvous_host
+        self.peer_ip = peer_ip
+        self.rendezvous_ip = rendezvous_ip
         self.rendezvous_port = rendezvous_port
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind(('0.0.0.0', 0))
-        # print local address
-        print(f"Local address: {self.sock.getsockname()}")
-        self.peers = {}
-        self.local_addr = self.sock.getsockname()
 
-    def register_with_rendezvous(self):
-        message = json.dumps({
+
+        # sending a message to the rendezvous server to find a neerby port
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.bind(('0.0.0.0', 0))
+        sock.sendto(json.dumps({
             'type': 'register',
-            'username': self.username,
-            'local_addr': self.local_addr
-        })
-        self.sock.sendto(message.encode(), (self.rendezvous_host, self.rendezvous_port))
+            'username': username,
+            'message_sock': sock.getsockname()
+        }).encode(), (rendezvous_ip, rendezvous_port))
 
-    def get_peer_list(self):
+    def punch(self,socket, message, addr):
         message = json.dumps({
-            'type': 'get_peers'
+            'type': 'punch',
+            'username': self.username,
+            'message': message
         })
-        self.sock.sendto(message.encode(), (self.rendezvous_host, self.rendezvous_port))
-
-    def update_peer_list(self):
+        print(f"Sending punch to {addr}: {message}")
+        socket.sendto(message.encode(), addr)
+        
+    def receive_punch(self, socket):
         while True:
-            self.get_peer_list()
-            time.sleep(5)
+            data, addr = socket.recvfrom(1024)
+            message = json.loads(data.decode())
+            if message['type'] == 'punch':
+                print(f"Received punch from {addr}: {message['message']}")
+    
+    def bulk_port_scan(self,n_socks, range_start, range_end):
+        sockets = []
+        for _ in range(n_socks):
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.bind(('0.0.0.0', 0))
+            sockets.append(sock)
 
-    def send_message(self, message, broadcast=False):
-        if broadcast:
-            for peer, addr in self.peers.items():
-                if peer != self.username:
-                    print(f"Sending to {peer}: {message} ({addr['addr']})")
-                    m = json.dumps({
-                        'type': 'message',
-                        'from': self.username,
-                        'message': message
-                    })
-                    self.sock.sendto(m.encode(), tuple(addr['addr']))
-        else:
-            self.send_message(message, broadcast=True)
+        for i, sock in enumerate(sockets):
+            thread = threading.Thread(target=self.port_scan, args=(sock, i, range_start, range_end))
+            thread.start()
+            
+            
 
-    def receive_messages(self):
-        while True:
-            data, addr = self.sock.recvfrom(1024)
-            try:
-                response = json.loads(data.decode())
-                if response['type'] == 'peer_list':
-                    self.peers = response['peers']
-                    print("Updated peer list:")
-                    for peer, peer_info in self.peers.items():
-                        print(f"  {peer}: {peer_info['addr']}")
-                else:
-                    print(f"Received from {addr}: {data.decode()}")
-            except json.JSONDecodeError:
-                print(f"Received from {addr}: {data.decode()}")
-
-    def run(self):
-        self.register_with_rendezvous()
-        receive_thread = threading.Thread(target=self.receive_messages)
-        receive_thread.start()
-        update_thread = threading.Thread(target=self.update_peer_list)
-        update_thread.start()
-
-        hole_punch_thread = threading.Thread(target=self.hole_punch)
-        hole_punch_thread.start()
-
-        print("You can start sending messages.")
-        while True:
-            message = input("Enter message (or 'quit' to exit): ")
-            if message.lower() == 'quit':
-                break
-            self.send_message(message)
-
-        print("Exiting...")
-
-    def hole_punch(self):
-        print("Starting hole punch...")
-        while True:
-            message = json.dumps({
-                'type': 'hole_punch',
-                'username': self.username
+    def port_scan(self, sock, i, range_start, range_end):
+        message = json.dumps({
+                'type': 'punch',
+                'username': self.username,
+                'message': f"punch {i}"
             })
-            for peer, addr in self.peers.items():
-                if peer != self.username:
-                    self.sock.sendto(message.encode(), tuple(addr['addr']))
+        while True:
+            for port in range(range_start, range_end):
+                addr = (self.peer_ip, port)
+                self.punch(sock, message, addr)
+                time.sleep(0.1)
+    
+    def run(self):
+        # self.port_scan(100, 6000, 7000)
+        n_ports = input("Enter the number of ports to scan: ")
+        range_start = input("Enter the start of the range: ")
+        range_end = input("Enter the end of the range: ")
+        self.bulk_port_scan(int(n_ports), int(range_start), int(range_end))
+
+
+
+        
 
 if __name__ == '__main__':
     username = input("Enter your username: ")
-    client = PeerClient(username, '54.221.183.140', 5000)
+    client = PeerClient(username, '4.213.182.140','3.82.57.239', 5000)
     client.run()
