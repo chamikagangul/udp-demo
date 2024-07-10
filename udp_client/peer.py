@@ -26,6 +26,7 @@ class PeerClient:
             'username': self.username,
             'message': message
         })
+        print(f"Sending punch to {addr}: {message}")
         socket.sendto(message.encode(), addr)
         
     def receive_punch(self, socket):
@@ -54,10 +55,11 @@ class PeerClient:
                 'username': self.username,
                 'message': f"punch {i}"
             })
-        for port in range(range_start, range_end):
-            addr = (self.peer_ip, port)
-            self.punch(sock, message, addr)
-            time.sleep(0.1)
+        while True:
+            for port in range(range_start, range_end):
+                addr = (self.peer_ip, port)
+                self.punch(sock, message, addr)
+                time.sleep(0.1)
     
     def run(self):
         # self.port_scan(100, 6000, 7000)
@@ -72,5 +74,5 @@ class PeerClient:
 
 if __name__ == '__main__':
     username = input("Enter your username: ")
-    client = PeerClient(username, '4.213.182.140 ','3.82.57.239', 5000)
+    client = PeerClient(username, '4.213.182.140','3.82.57.239', 5000)
     client.run()
