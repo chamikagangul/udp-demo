@@ -17,11 +17,12 @@ class RendezvousServer:
         while True:
             data, addr = self.sock.recvfrom(1024)
             message = json.loads(data.decode())
+            print(f"Received message from {addr}: {message}")
             
             if message['type'] == 'register':
                 self.peers[message['username']] = {
                     'addr': addr,
-                    'local_addr': message['local_addr']
+                    'message_addr': message['message_sock']
                 }
                 print(f"Registered {message['username']} at {addr}")
             elif message['type'] == 'get_peers':

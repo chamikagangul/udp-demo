@@ -15,11 +15,14 @@ class PeerClient:
         self.peers = {}
         self.local_addr = self.sock.getsockname()
 
+        self.messageSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.messageSock.bind(('0.0.0.0', 0))
+
     def register_with_rendezvous(self):
         message = json.dumps({
             'type': 'register',
             'username': self.username,
-            'local_addr': self.local_addr
+            'message_sock': self.messageSock.getsockname()
         })
         self.sock.sendto(message.encode(), (self.rendezvous_host, self.rendezvous_port))
 
@@ -57,11 +60,16 @@ class PeerClient:
                     self.peers = response['peers']
                     print("Updated peer list:")
                     for peer, peer_info in self.peers.items():
-                        print(f"  {peer}: {peer_info['addr']}")
+                        print(f"  {peer}: {peer_info['message_addr']}")
                 else:
                     print(f"Received from {addr}: {data.decode()}")
             except json.JSONDecodeError:
                 print(f"Received from {addr}: {data.decode()}")
+    
+    def receive_messages2(self):
+        while True:
+            data, addr = self.messageSock.recvfrom(1024)
+            print(f"Received from {addr}: {data.decode()}")
 
     def run(self):
         self.register_with_rendezvous()
@@ -72,6 +80,9 @@ class PeerClient:
 
         hole_punch_thread = threading.Thread(target=self.hole_punch)
         hole_punch_thread.start()
+
+        message_thread = threading.Thread(target=self.receive_messages2)
+        message_thread.start()
 
         print("You can start sending messages.")
         while True:
@@ -88,12 +99,14 @@ class PeerClient:
             message = json.dumps({
                 'type': 'hole_punch',
                 'username': self.username
-            })
+            })  
             for peer, addr in self.peers.items():
                 if peer != self.username:
-                    self.sock.sendto(message.encode(), tuple(addr['addr']))
+                    self.messageSock.sendto(message.encode(), tuple(addr['message_addr']))
+                    print(f"Sent hole punch to {peer}")
+                time.sleep(1)
 
 if __name__ == '__main__':
     username = input("Enter your username: ")
-    client = PeerClient(username, '54.221.183.140', 5000)
+    client = PeerClient(username, 'localhost', 5000)
     client.run()
