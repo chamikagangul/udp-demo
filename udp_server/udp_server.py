@@ -20,8 +20,8 @@ class RendezvousServer:
             print(f"Received message from {addr}: {message}")
             
             if message['type'] == 'register':
-                message_addr = message['message_sock'][0]
-                message_port = addr[1]
+                message_addr = addr[0]
+                message_port = message['message_sock'][1]
                 
                 self.peers[message['username']] = {
                     'addr': addr,
