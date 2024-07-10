@@ -108,5 +108,5 @@ class PeerClient:
 
 if __name__ == '__main__':
     username = input("Enter your username: ")
-    client = PeerClient(username, 'localhost', 5000)
+    client = PeerClient(username, '100.26.29.237', 5000)
     client.run()
