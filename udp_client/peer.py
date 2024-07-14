@@ -2,6 +2,7 @@ import socket
 import json
 import threading
 import time
+import random
 
 class PeerClient:
     def __init__(self, username, peer_ip, rendezvous_ip, rendezvous_port):
@@ -61,10 +62,10 @@ class PeerClient:
                 'message': f"punch {i}"
             })
         while True:
-            for port in range(range_start, range_end):
-                addr = (self.peer_ip, port)
-                self.punch(sock, message, addr)
-                time.sleep(0.01)
+            port = random.randint(range_start, range_end)
+            addr = (self.peer_ip, port)
+            self.punch(sock, message, addr)
+            time.sleep(0.01)
     
     def run(self):
         # self.port_scan(100, 6000, 7000)
