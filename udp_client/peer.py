@@ -46,6 +46,8 @@ class PeerClient:
         for i, sock in enumerate(sockets):
             thread = threading.Thread(target=self.port_scan, args=(sock, i, range_start, range_end))
             thread.start()
+            listen_thread = threading.Thread(target=self.receive_punch, args=(sock,))
+            listen_thread.start()
             
             
 
@@ -59,14 +61,12 @@ class PeerClient:
             for port in range(range_start, range_end):
                 addr = (self.peer_ip, port)
                 self.punch(sock, message, addr)
-                time.sleep(0.1)
+                time.sleep(0.01)
     
     def run(self):
         # self.port_scan(100, 6000, 7000)
-        n_ports = input("Enter the number of ports to scan: ")
-        range_start = input("Enter the start of the range: ")
-        range_end = input("Enter the end of the range: ")
-        self.bulk_port_scan(int(n_ports), int(range_start), int(range_end))
+        n_socks = input("Enter the number of ports to scan: ")
+        self.bulk_port_scan(int(n_socks), 0, 65535)
 
 
 

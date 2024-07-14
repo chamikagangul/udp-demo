@@ -35,7 +35,6 @@ class RendezvousServer:
                     'peers': self.peers
                 })
                 self.sock.sendto(response.encode(), addr)
-                self.sock2.sendto("test ping".encode(), addr)
 
 if __name__ == '__main__':
     server = RendezvousServer('0.0.0.0', 5000)
