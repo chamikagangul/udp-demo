@@ -35,6 +35,9 @@ class PeerClient:
             message = json.loads(data.decode())
             if message['type'] == 'punch':
                 print(f"Received punch from {addr}: {message['message']}")
+                # write a response to a file 
+                with open('punches.txt', 'a') as f:
+                    f.write(f"{message['message']}\n and the address is {addr}\n")
     
     def bulk_port_scan(self,n_socks, range_start, range_end):
         sockets = []
@@ -66,7 +69,7 @@ class PeerClient:
     def run(self):
         # self.port_scan(100, 6000, 7000)
         n_socks = input("Enter the number of ports to scan: ")
-        self.bulk_port_scan(int(n_socks), 0, 65535)
+        self.bulk_port_scan(int(n_socks), 1, 65535)
 
 
 
@@ -74,5 +77,5 @@ class PeerClient:
 
 if __name__ == '__main__':
     username = input("Enter your username: ")
-    client = PeerClient(username, '4.213.182.140','3.82.57.239', 5000)
+    client = PeerClient(username, '4.213.171.161','3.82.57.239', 5000)
     client.run()
